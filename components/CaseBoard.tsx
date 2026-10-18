@@ -1,7 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { CaseFile, RecordItem } from "@/lib/stats";
-import { Om, VERDICT_OM } from "./Om";
 import { Scale } from "./Scale";
 import { Tape } from "./Tape";
 import { KIND_COLOR } from "@/lib/kinds";
@@ -32,8 +31,8 @@ export function CaseBoard({ file }: { file: CaseFile }) {
   if (counts.total === 0) {
     return (
       <section className="empty">
-        <Om name="detective" size={190} className="mascot" />
-        <p>Not on record. Yet.</p>
+        <div className="stamp ink big">UNWITNESSED</div>
+        <p>Nothing here speaks for them yet.</p>
         <Witness handle={file.channel} />
       </section>
     );
@@ -43,7 +42,6 @@ export function CaseBoard({ file }: { file: CaseFile }) {
     <>
       <section className="board">
         <div className="verdict-zone shake">
-          <Om name={VERDICT_OM[verdict.word]} size={124} className="verdict-om" />
           <div className={`stamp ${verdict.tone} big`}>{verdict.word}</div>
         </div>
         <Scale before={counts.call} after={counts.claim} pick={pick === "call" || pick === "claim" ? pick : null} onPick={solo} />

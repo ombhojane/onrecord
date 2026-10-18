@@ -41,8 +41,14 @@ function Receipt({ it, i, onOpen }: { it: RecordItem; i: number; onOpen: () => v
 function Tomb({ it, i, onOpen }: { it: RecordItem; i: number; onOpen: () => void }) {
   return (
     <button className="tomb" style={{ ["--i" as string]: i }} onClick={onOpen} aria-label={`message ${it.msgId} deleted`}>
-      <img src="/om/headstone.svg" width={112} height={112} alt="" draggable={false} />
-      <span className="tomb-id">#{it.msgId}</span>
+      <svg viewBox="0 0 120 160">
+        <path d="M18 150 V62 Q18 14 60 14 Q102 14 102 62 V150 Z" fill="#d8d0c1" stroke="var(--ink)" strokeWidth="3" strokeLinejoin="round" />
+        <path d="M30 150 V66 Q30 26 60 26" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="3" strokeLinecap="round" />
+        <text x="60" y="76" textAnchor="middle" style={{ font: "italic 400 26px var(--font-serif)" }} fill="var(--ink)">RIP</text>
+        <text x="60" y="104" textAnchor="middle" style={{ font: "700 14px var(--font-mono)" }} fill="var(--red)">#{it.msgId}</text>
+        <path d="M4 152 H116" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" />
+        <path d="M12 152 l4 -12 l3 12 M98 152 l3 -10 l4 10 M84 152 l2 -7 l3 7" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
     </button>
   );
 }

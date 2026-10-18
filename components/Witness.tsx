@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { txUrl } from "@/lib/config";
-import { Om } from "./Om";
 
 type Result = { written: number; tombs: number; calls: number; restricted: boolean; txHashes: string[] };
 
@@ -65,7 +64,10 @@ export function Witness({ handle }: { handle: string }) {
               <textPath href="#sealpath">{busy ? "witnessing · witnessing · " : "witness · on record · "}</textPath>
             </text>
           </svg>
-          <Om name="magnifier" size={58} className={busy ? "seal-om busy" : "seal-om"} />
+          <svg className={busy ? "seal-om busy" : "seal-om"} width="46" height="46" viewBox="0 0 46 46" fill="none" aria-hidden>
+            <circle cx="19" cy="19" r="12.5" stroke="currentColor" strokeWidth="4.5" />
+            <line x1="28.5" y1="28.5" x2="40" y2="40" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round" />
+          </svg>
         </button>
         {busy && (
           <div className="printing" aria-hidden>

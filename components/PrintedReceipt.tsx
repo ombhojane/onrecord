@@ -7,7 +7,7 @@ import { KIND_COLOR } from "@/lib/kinds";
 
 const WORD: Record<RecordItem["kind"], string> = {
   call: "call",
-  claim: "claim",
+  claim: "profit claim",
   promo: "promo",
   other: "chatter",
   deleted: "deleted",
@@ -23,7 +23,22 @@ function Marked({ text }: { text: string }) {
   );
 }
 
-/** One piece of evidence, printed out. */
+/** The entity's real sha256 drawn as a ticket barcode: each hex digit sets a bar width. */
+function Barcode({ hex }: { hex: string }) {
+  const bars = (hex || "0").slice(0, 44).split("");
+  return (
+    <div className="barcode" aria-hidden>
+      <div className="bars">
+        {bars.map((c, i) => (
+          <i key={i} style={{ width: 1 + (parseInt(c, 16) % 4), opacity: i % 7 === 3 ? 0.6 : 1 }} />
+        ))}
+      </div>
+      <span className="code mono">{hex?.slice(0, 24)}…</span>
+    </div>
+  );
+}
+
+/** One piece of evidence, printed as a ticket. */
 export function PrintedReceipt({ it, onClose }: { it: RecordItem; onClose: () => void }) {
   const [left, setLeft] = useState(it.secondsLeft);
   const [state, setState] = useState<{ busy?: boolean; tx?: string; err?: string }>({});
@@ -54,51 +69,65 @@ export function PrintedReceipt({ it, onClose }: { it: RecordItem; onClose: () =>
   return (
     <div className="scrim" onClick={onClose}>
       <article className="receipt zig" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal>
-        <button className="close" onClick={onClose} aria-label="close">✕</button>
-        <div className="rhead">
-          <div>
-            <div className="rid">#{it.msgId}</div>
-            <div className="when">{agoLabel(it.seenAt)}</div>
-          </div>
-          <div className={`stamp small ${it.kind === "deleted" ? "red" : "ink"}`} style={{ background: KIND_COLOR[it.kind], marginRight: 30 }}>
-            {WORD[it.kind]}
-          </div>
+        <button className="close" onClick={onClose} aria-label="close">
+          ✕
+        </button>
+
+        <div className="tk-top mono">
+          <span>ONRECORD · ORIGINAL RECEIPT</span>
+          <span>Re. {it.msgId}</span>
         </div>
-        <hr />
+
+        <div className="tk-row">
+          <span className="tk-k">kind</span>
+          <span className="tk-v">
+            <i className="sw" style={{ background: KIND_COLOR[it.kind] }} /> {WORD[it.kind]}
+          </span>
+        </div>
+        <div className="tk-row">
+          <span className="tk-k">witnessed</span>
+          <span className="tk-v">{agoLabel(it.seenAt)}</span>
+        </div>
+
         {it.type === "tomb" ? (
-          <div className="body">
-            Seen. Then <mark>gone</mark>.
+          <div className="body tk-quote gone">
+            Seen on the record. Then <mark>deleted</mark> at source.
           </div>
         ) : it.text ? (
-          <div className="body">
+          <div className="body tk-quote">
             <Marked text={it.text} />
           </div>
         ) : (
-          <div className="hash">sha256 {it.sha256}</div>
+          <div className="tk-quote hash">content witnessed as hash only</div>
         )}
-        <hr />
-        <div className="rows">
-          <div>
-            <span>life</span>
-            <span style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-              {leftLabel(left)} <Candle left={left} life={it.lifetime} />
-            </span>
-          </div>
-          {it.creator && (
-            <div>
-              <span>witness</span>
-              <a href={ownerUrl(it.creator)} target="_blank" rel="noreferrer">
-                {it.creator.slice(0, 6)}…{it.creator.slice(-4)}
-              </a>
-            </div>
-          )}
-          <div>
-            <span>entity</span>
-            <a href={entityUrl(it.key)} target="_blank" rel="noreferrer">
-              {it.key.slice(0, 10)}…
+
+        <div className="tk-row">
+          <span className="tk-k">lifetime</span>
+          <span className="tk-v" style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+            {leftLabel(left)} <Candle left={left} life={it.lifetime} />
+          </span>
+        </div>
+        <div className="tk-row">
+          <span className="tk-k">edits</span>
+          <span className="tk-v">nobody can edit · anyone can extend</span>
+        </div>
+        {it.creator && (
+          <div className="tk-row">
+            <span className="tk-k">witness</span>
+            <a className="tk-v mono" href={ownerUrl(it.creator)} target="_blank" rel="noreferrer">
+              {it.creator.slice(0, 8)}…{it.creator.slice(-6)}
             </a>
           </div>
+        )}
+        <div className="tk-row">
+          <span className="tk-k">entity</span>
+          <a className="tk-v mono" href={entityUrl(it.key)} target="_blank" rel="noreferrer">
+            {it.key.slice(0, 12)}…{it.key.slice(-6)}
+          </a>
         </div>
+
+        <Barcode hex={it.sha256 ?? it.key.slice(2)} />
+
         <div className="acts">
           <a className="btn" href={entityUrl(it.key)} target="_blank" rel="noreferrer">
             proof ↗

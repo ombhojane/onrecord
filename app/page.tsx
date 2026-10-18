@@ -1,48 +1,40 @@
-import { allCases, type CaseSummary } from "@/lib/stats";
-import { Om, VERDICT_OM } from "@/components/Om";
+import { allCases } from "@/lib/stats";
 import { SearchSlip } from "@/components/SearchSlip";
-import { Stamp } from "@/components/Stamp";
-import { KIND_COLOR } from "@/lib/kinds";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  let cases: CaseSummary[] = [];
+  let pool: string[] = [];
   try {
-    cases = await allCases();
+    pool = (await allCases()).map((c) => c.channel);
   } catch {}
 
   return (
-    <main className="wrap">
-      <section className="hero">
-        <Om name="detective" size={168} className="mascot" />
-        <h1>
-          Show me the <em>receipts.</em>
-        </h1>
-        <p className="sub">
-          <b>93%</b> of F&amp;O traders lost money. Check who they followed.
-        </p>
-        <SearchSlip />
+    <main>
+      <section className="stage">
+        <div className="stage-inner">
+          <p className="kicker">Telegram tip channels, held to their word</p>
+          <h1 className="stage-title">
+            Show me the
+            <br />
+            <em>receipts.</em>
+          </h1>
+          <aside className="stage-meta l">
+            <b>Witnessed on Arkiv</b>
+            <span>every post, notarised</span>
+          </aside>
+          <aside className="stage-meta r">
+            <b>₹1.8 lakh crore lost</b>
+            <span>93% of F&O traders · SEBI</span>
+          </aside>
+          <div className="stage-search">
+            <SearchSlip pool={pool} />
+          </div>
+        </div>
+        <figure className="bazaar" aria-hidden>
+          <img src="/art/frieze.png" alt="" draggable={false} />
+        </figure>
       </section>
-
-      {cases.length > 0 && (
-        <section className="cases">
-          {cases.map((c) => (
-            <a key={c.channel} href={`/c/${c.channel}`} className="folder">
-              <div className="h">@{c.channel}</div>
-              <div className="tally">
-                <span><i className="sw" style={{ background: KIND_COLOR.call }} />{c.counts.call}</span>
-                <span><i className="sw" style={{ background: KIND_COLOR.claim }} />{c.counts.claim}</span>
-                {c.counts.deleted > 0 && <span><i className="sw" style={{ background: KIND_COLOR.deleted }} />{c.counts.deleted}</span>}
-              </div>
-              <Om name={VERDICT_OM[c.verdict.word]} size={44} className="folder-om" />
-              <span className="mini">
-                <Stamp verdict={c.verdict} size="small" />
-              </span>
-            </a>
-          ))}
-        </section>
-      )}
     </main>
   );
 }
