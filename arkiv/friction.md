@@ -1,0 +1,102 @@
+# Friction report — building OnRecord on Arkiv (SDK 0.8.1, Tiramisu)
+
+Environment: macOS, Node 22.14, `@arkiv-network/sdk@0.8.1` (+ `viem` peer), Next.js 15.
+Written as a running log during the build (Oct 18, 2026). Expected vs actual, with
+repro where useful.
+
+## 1. The faucet is wallet-connect-only — agents and CI can't fund themselves
+**Expected:** a POST endpoint or CLI (`arkiv faucet <address>`) like most testnets.
+**Actual:** https://hub.arkiv.network/faucet requires an interactive wallet connection;
+docs (`/networks/tiramisu/`) document no API. Our witness runs headless with a
+generated key (`privateKeyToAccount`), so a human had to click the faucet — the single
+biggest onboarding stall of the project, and it will bite every agent-shaped use case
+you are courting. **Fix first:** a rate-limited `POST /faucet {address}` (even
+captcha-gated) or a Discord bot command.
+
+## 2. Docs/SDK drift: the README teaches 0.6-era surface, write APIs are undocumented
+**Expected:** README/docs cover `extendEntity`, `deleteEntity`, `patchEntity`,
+`watchEntityEvents`, `changeOwnership`.
+**Actual:** the package README (titled "arkivjs", dependency block showing `^0.6.0`)
+documents only `createEntity` + queries; we had to read `dist/*.d.ts` and `src/` to
+learn the rest (e.g. `ExpirationTime.atDate`, `atBlock({atLeast})`, `permanent()` —
+genuinely nice APIs, invisible in docs). AGENTS.md's "verify against the package" is
+honest but it means every builder re-derives the API from types under deadline.
+**Fix:** generated API reference from the `.d.ts`, linked from the README.
+
+## 3. `ExpirationTime` seconds must be multiples of block time (2s)
+**Expected:** any positive seconds value.
+**Actual:** `fromSeconds(s)` throws unless `s % 2 === 0` (found in
+`src/entity/expiry.ts`; error message suggests the rounding yourself). Harmless once
+known, but `fromSeconds(5)` failing with a lecture is the kind of papercut a
+`round: "up"` option would erase.
+
+## 4. Entity expiry emits no event — our tombstone logic had to be rethought
+**Expected:** subscribe to expirations to mark calls as lapsed.
+**Actual:** documented behavior: expiry is passive; `watchEntityEvents` needs a
+WebSocket transport and silently degrades to polling over HTTP. We compute lapse
+client-side from `$expiresAt`-style reasoning (call lifetime = 3 days) instead. An
+`expired` event stream — even best-effort — would unlock the "trigger on expiry"
+category your own ecosystem page asks for ("Arkiv triggers").
+
+## 5. No server-side `orderBy`, no `ne` — scoreboards sort client-side
+**Expected:** `ORDER BY msgId DESC LIMIT 50` for a channel timeline.
+**Actual:** by design (AGENTS.md); we fetch all pages via the async iterator and sort
+in process. Fine at hackathon scale; at 10⁵ messages per channel the full-scan pattern
+will hurt. A `orderBy($createdAt)` on numeric attributes would remove the most common
+client-side workaround we wrote.
+
+## 6. `executeBatch` and creation flags exist — but only in the type definitions
+**Expected:** docs for atomic multi-entity writes and creation flags.
+**Actual:** we first wrote one `createEntity` per message and assumed no batch API
+existed (an earlier draft of this report said so — that was wrong). Reading
+`src/actions/wallet/executeBatch.ts` revealed `executeBatch({ creates, patches,
+deletes, extensions, ownershipChanges })` — exactly what a witness needs: a whole page
+snapshot lands in one block with one timestamp. Likewise `flags: { readonly,
+permissionlessExtension }` (from `entity/flags.ts`) turned out to be the most
+product-defining feature we used: evidence nobody (including us) can edit, which
+anyone can keep alive. Neither appears in the README or the docs pages we read.
+**Fix:** a "Batch writes" and a "Creation flags" page — these are your
+differentiators, and they are invisible.
+
+## 6b. Attribute values read back as tagged objects — silent `NaN` in our dedupe
+**Repro:** create with `msgId: u64(5807n)`, then
+`select({ attributes: true })` → `e.attributes.msgId` is `{ type: "u64", value: 5807n }`,
+not `5807n`. `Number(e.attributes.msgId)` → `NaN`; `typeof a.channel === "string"` →
+`false`. No type error at the call site because we read through `unknown`.
+**Impact:** our "already witnessed?" set came back empty, so every refresh would have
+re-written every message. Caught by a type error elsewhere (comparing `AnyArkivValue` to
+a string), not by the read path. **Fix:** a documented `value(attr)` helper, or a
+`select({ attributes: "plain" })` mode; at minimum show the read-back shape in the
+README next to the write example.
+
+## 6c. Data Explorer deep links don't document the chain parameter
+`https://data.arkiv.network/entity/<key>` is documented; that Tiramisu needs
+`?chain=tiramisu` we found by reading the explorer's own nav links. Every proof link
+in a hackathon submission depends on this.
+
+## 6d. Attribute names reject uppercase — with an error that says uppercase is allowed
+**Repro:** `createEntity({ attributes: { contentHash: "…" }, … })` (SDK 0.8.1, Tiramisu).
+**Actual:** `Transaction failed: an attribute name holds "H" (0x48) at byte 7, which is
+outside the name charset ("A"-"Z", "a"-"z", "0"-"9", ".", "-" and "_", with a letter first)`.
+The message lists `A-Z` as allowed while rejecting `H`. It only surfaced on our first
+funded write (the SDK did not validate client-side), costing a round trip at the worst
+moment. We renamed to `content_hash` / `msg_id` / `seen_at`. **Fix:** validate names in
+the SDK before signing, and correct the charset in the error.
+
+## 7. Things that were genuinely smooth
+- The SDK ships query-injection tests (`src/query/injection.test.ts`) and typed `attr`
+  constructors; that is why we pass a user-supplied channel handle into `eq()` after
+  only a charset check.
+- `watchEntityEvents` over a WebSocket transport worked first try from the browser:
+  our header's live heartbeat received Tiramisu entity events within seconds of page
+  load, with no polling fallback.
+- Cost: our first witness passes wrote 28 entities in 3 batch transactions for ~0.0033
+  test GLM total; a re-run correctly wrote nothing (dedupe by `msg_id` query).
+- `extendEntity` with `ExpirationTime.atBlock(current + 30 days)` worked first try from
+  the UI: a receipt's remaining life went 59d → 89d, visible in the Data Explorer.
+- `ExpirationTime.atBlock` / `atDate` / `permanent()` made "a call lives exactly as long
+  as its validity" a one-liner.
+
+## One thing to improve first
+**Ship a programmatic faucet.** Everything else above is a papercut; #1 is a wall.
+Your pitch is "the database for agents," and agents cannot click "Connect wallet."

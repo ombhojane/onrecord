@@ -1,0 +1,27 @@
+{
+  "name": "onrecord",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OnRecord — the witness that can't be bought. Real track records for India's trading-tip channels, notarized on Arkiv.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "sync": "tsx scripts/sync.ts",
+    "wallet": "tsx scripts/wallet.ts"
+  },
+  "dependencies": {
+    "@arkiv-network/sdk": "^0.8.1",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
