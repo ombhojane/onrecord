@@ -29,8 +29,9 @@ A witness run on our own Postgres is just another screenshot: a ₹20-crore
 pump-and-dump operation (SEBI's May 2026 order) can buy, sue, or DDoS a startup's
 database into silence — and the record-keeper becomes the counterparty again. On
 Arkiv the record survives us: every row on the scoreboard links to a public explorer
-entity any judge, trader, or regulator can verify without our backend. `$creator`
-separates independent witnesses co-attesting the same channel. And expiry is product
+entity any judge, trader, or regulator can verify without our backend. Reads trust
+only `$creator`, which the chain sets, and every record is owned by `0x…dEaD`, so
+nobody (us included) can delete it. And expiry is product
 logic, not cleanup: **a trading call is a time-scoped claim** (call entities lapse
 with their own validity), raw witness records age out after grading, while deletion
 tombstones outlive the messages they indict.
