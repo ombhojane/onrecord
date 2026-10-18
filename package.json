@@ -11,7 +11,8 @@
     "start": "next start -p 3000",
     "sync": "tsx scripts/sync.ts",
     "wallet": "tsx scripts/wallet.ts",
-    "verify": "tsx scripts/verify.ts"
+    "verify": "tsx scripts/verify.ts",
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",

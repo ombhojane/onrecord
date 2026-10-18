@@ -49,6 +49,7 @@ npm run wallet            # generates the witness wallet into .env.local
 # fund the printed address at https://hub.arkiv.network/faucet (test GLM)
 npm run sync -- bulltrade_observation   # witness a real channel
 npm run dev               # open http://localhost:3000
+npm test                  # classifier + verdict rules (node:test)
 ```
 
 Network: Arkiv **Tiramisu** testnet, chain id `7738577`
@@ -83,6 +84,28 @@ it), and the content hash matches.
   writes with `app = "onrecord"` never shows up.
 - Example witnessed claim (readonly + permissionlessExtension):
   [`0xb2a791f7…0c548c`](https://data.arkiv.network/entity/0xb2a791f7cf143506d218921568e9425f082479ce215453a6c4baaaf1700c548c?chain=tiramisu)
+
+## Channels NSE has warned about, now on record
+
+NSE publishes cautions against unregistered Telegram channels offering tips, "assured
+returns" and account handling. On 18 Oct 2026 we witnessed the public ones named in
+its 2026 notices (as reported by Moneylife), so their posts from that day on are
+readonly, owned by `0x…dEaD` and checkable with `npm run verify -- <handle>`:
+
+| Channel | NSE notice | On record |
+|---|---|---|
+| [@Om_Trade_Earn](https://onrecord.omisaur.app/c/Om_Trade_Earn) ("OM TRADERS") | 24 Aug 2026 | 17 posts, 9 parsed calls, 7 profit claims |
+| [@banknift_nifty50_updates_news](https://onrecord.omisaur.app/c/banknift_nifty50_updates_news) ("BANKNIFTY FUTURES AND OPTION TRADING") | 17 Aug 2026 | 20 posts |
+| [@Ce_And_pe_Call_And_Put_nifty50](https://onrecord.omisaur.app/c/Ce_And_pe_Call_And_Put_nifty50) ("Ddd") | 18 Aug 2026 | 7 posts |
+| [@lootdealsoffersbest](https://onrecord.omisaur.app/c/lootdealsoffersbest) | earlier 2026 | 2 posts |
+
+`@sharemarketeducationaltip` ("SHARE MARKET BULL", 19 Aug) no longer has a public page,
+and channels NSE named only by private invite link can't be witnessed from outside.
+If any of these delete a post from now on, the next witness pass records a tombstone.
+
+Sources: [Moneylife, 5 operators](https://www.moneylife.in/article/nse-warns-investors-against-5-telegram-and-social-media-operators-offering-market-tips-and-account-handling-services/81434.html),
+[Moneylife, 2 channels](https://www.moneylife.in/article/nse-warns-investors-against-2-telegram-channels-offering-trading-tips-account-handling-services/81493.html),
+[Moneylife, lootdealsoffersbest](https://moneylife.in/article/nse-warns-investors-against-lootdealsoffersbest-telegram-channel-zerotoherocalls-youtube-channel/80875.html).
 
 ## Honest limits
 

@@ -1,5 +1,18 @@
 # Friction report — building OnRecord on Arkiv (SDK 0.8.1, Tiramisu)
 
+Items 6b, 6d, 6e, 6f and 6g each have a script in [`arkiv/repro/`](repro/) that
+reproduces them against Tiramisu. Output from our last run (18 Oct 2026):
+
+```
+6b  msg_id as read back: { type: 'u64', value: 3n }   Number(msg_id): NaN
+6d  rejected: an attribute name holds "H" (0x48) at byte 7, which is outside the
+    name charset ("A"-"Z", "a"-"z", ...)
+6e  app = str('onrecord') AND type = str('msg') AND channel = str('bulltrade_observation')
+6f  A readonly, owned by us        -> delete SUCCEEDED
+    B readonly + owned by 0x…dEaD  -> delete REVERTED: entity … is owned by 0x…dEaD
+6g  wallet client has predictEntityKeys at runtime: false
+```
+
 Environment: macOS, Node 22.14, `@arkiv-network/sdk@0.8.1` (+ `viem` peer), Next.js 15.
 Written as a running log during the build (Oct 18, 2026). Expected vs actual, with
 repro where useful.
@@ -59,6 +72,7 @@ anyone can keep alive. Neither appears in the README or the docs pages we read.
 differentiators, and they are invisible.
 
 ## 6b. Attribute values read back as tagged objects — silent `NaN` in our dedupe
+**Run it:** [`arkiv/repro/6b-tagged-values.ts`](repro/6b-tagged-values.ts) (`npx tsx arkiv/repro/6b-tagged-values.ts`)
 **Repro:** create with `msgId: u64(5807n)`, then
 `select({ attributes: true })` → `e.attributes.msgId` is `{ type: "u64", value: 5807n }`,
 not `5807n`. `Number(e.attributes.msgId)` → `NaN`; `typeof a.channel === "string"` →
@@ -75,6 +89,7 @@ README next to the write example.
 in a hackathon submission depends on this.
 
 ## 6d. Attribute names reject uppercase — with an error that says uppercase is allowed
+**Run it:** [`arkiv/repro/6d-uppercase-name.ts`](repro/6d-uppercase-name.ts) (`npx tsx arkiv/repro/6d-uppercase-name.ts`)
 **Repro:** `createEntity({ attributes: { contentHash: "…" }, … })` (SDK 0.8.1, Tiramisu).
 **Actual:** `Transaction failed: an attribute name holds "H" (0x48) at byte 7, which is
 outside the name charset ("A"-"Z", "a"-"z", "0"-"9", ".", "-" and "_", with a letter first)`.
@@ -84,6 +99,7 @@ moment. We renamed to `content_hash` / `msg_id` / `seen_at`. **Fix:** validate n
 the SDK before signing, and correct the charset in the error.
 
 ## 6e. Data Explorer query errors don't point at the actual mistake
+**Run it:** [`arkiv/repro/6e-explorer-quotes.ts`](repro/6e-explorer-quotes.ts) (`npx tsx arkiv/repro/6e-explorer-quotes.ts`)
 **Repro (Tiramisu, data.arkiv.network):**
 - `app = str("onrecord") AND …` (double quotes) → `Query rejected (literal, -32003):
   Transaction creation failed.` — a query is not a transaction.
@@ -94,6 +110,7 @@ We only found the accepted form by calling the SDK's `render()` on our own predi
 `render()` output of a TypeScript query in the explorer's TypeScript panel.
 
 ## 6f. `readonly` does not stop the owner deleting — we nearly shipped a false claim
+**Run it:** [`arkiv/repro/6f-readonly-delete.ts`](repro/6f-readonly-delete.ts) (`npx tsx arkiv/repro/6f-readonly-delete.ts`)
 **Expected:** `readonly: true` means the evidence can't be removed, which is what our
 first README and submission draft said.
 **Actual:** the `CreationFlags` doc comment (SDK 0.8.1) says a readonly entity can still
@@ -104,11 +121,12 @@ from our own key reverts with `entity … is owned by 0x…dEaD, not 0x3e4d…`.
 **Fix:** say it on the flags page, in the name if possible: "readonly (edit-proof, not
 delete-proof)". Most teams will read `readonly` the way we did.
 
-## 6g. `predictEntityKeys` isn't on the wallet client's type
+## 6g. `predictEntityKeys` isn't on the wallet client
+**Run it:** [`arkiv/repro/6g-predict-type.ts`](repro/6g-predict-type.ts) (`npx tsx arkiv/repro/6g-predict-type.ts`)
 **Repro (SDK 0.8.1):** `walletClient().predictEntityKeys({ owner, count })` → TypeScript
-`TS2339: Property 'predictEntityKeys' does not exist`, although the wallet client's doc
-says it carries "the read actions a Public Client has". `publicClient().predictEntityKeys`
-works. Minor, but it sits on the one path (predict → batch → hand over ownership) that
+`TS2339: Property 'predictEntityKeys' does not exist`, and at runtime the property is
+`undefined` too, although the wallet client's doc says it carries "the read actions a
+Public Client has". `publicClient().predictEntityKeys` works. Minor, but it sits on the one path (predict → batch → hand over ownership) that
 makes evidence undeletable, so it's worth getting right.
 
 ## 7. Things that were genuinely smooth
