@@ -368,6 +368,24 @@ button { font: inherit; color: inherit; }
 .candle.out .flame { visibility: hidden; }
 @keyframes flicker { 0% { transform: rotate(-4deg) scaleY(.92) } 100% { transform: rotate(4deg) scaleY(1.08) } }
 
+/* ---------- openmoji elements ---------- */
+.om { display: block; user-select: none; }
+.logo-om { margin: -4px -2px -4px -4px; }
+.mascot { transform: rotate(-6deg); animation: peek 4.5s ease-in-out infinite; filter: drop-shadow(0 6px 0 rgba(23,20,15,.12)); }
+@keyframes peek { 0%, 100% { transform: rotate(-6deg) translateY(0) } 50% { transform: rotate(-2deg) translateY(-8px) } }
+.verdict-om { margin-bottom: -18px; position: relative; z-index: 1; transform: rotate(8deg); animation: plop .6s .5s var(--spring) backwards; }
+@keyframes plop { from { transform: rotate(-20deg) scale(.3) } }
+.folder-om { position: absolute; right: 12px; top: -26px; transform: rotate(10deg); transition: transform .3s var(--spring); }
+.folder:hover .folder-om { transform: rotate(-6deg) scale(1.12); }
+.seal-om { transition: transform .3s var(--spring); }
+.seal:hover .seal-om { transform: rotate(-14deg) scale(1.08); }
+.seal-om.busy { animation: scan 1.1s ease-in-out infinite; }
+@keyframes scan { 0%, 100% { transform: translateX(-8px) rotate(-10deg) } 50% { transform: translateX(8px) rotate(10deg) } }
+.tomb { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0; }
+.tomb img { transition: transform .35s var(--spring); transform-origin: bottom center; }
+.tomb:hover img { transform: rotate(-8deg); }
+.tomb-id { font: 700 13px var(--font-mono), monospace; color: var(--red); margin-top: -6px; }
+
 /* ---------- eye ---------- */
 .eye { display: block; overflow: visible; }
 .eye .lid { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }

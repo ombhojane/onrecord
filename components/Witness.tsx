@@ -2,19 +2,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { txUrl } from "@/lib/config";
-import { Eye } from "./Eye";
+import { Om } from "./Om";
 
 type Result = { written: number; tombs: number; calls: number; restricted: boolean; txHashes: string[] };
 
 /** The seal. Press it and the witness reads the channel onto Arkiv in one atomic batch. */
-export function Witness({ handle, onMood }: { handle: string; onMood?: (m: "idle" | "stare") => void }) {
+export function Witness({ handle }: { handle: string }) {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ ok: boolean; node: React.ReactNode } | null>(null);
   const router = useRouter();
 
   async function run() {
     setBusy(true);
-    onMood?.("stare");
     setToast(null);
     try {
       const r = await fetch("/api/sync", {
@@ -50,7 +49,6 @@ export function Witness({ handle, onMood }: { handle: string; onMood?: (m: "idle
       setToast({ ok: false, node: <span>{(e as Error).message}</span> });
     } finally {
       setBusy(false);
-      onMood?.("idle");
       setTimeout(() => setToast(null), 7000);
     }
   }
@@ -67,7 +65,7 @@ export function Witness({ handle, onMood }: { handle: string; onMood?: (m: "idle
               <textPath href="#sealpath">{busy ? "witnessing · witnessing · " : "witness · on record · "}</textPath>
             </text>
           </svg>
-          <Eye size={64} mood={busy ? "stare" : "idle"} />
+          <Om name="magnifier" size={58} className={busy ? "seal-om busy" : "seal-om"} />
         </button>
         {busy && (
           <div className="printing" aria-hidden>

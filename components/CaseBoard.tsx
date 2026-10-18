@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import type { CaseFile, RecordItem } from "@/lib/stats";
-import { Eye, type Mood } from "./Eye";
+import { Om, VERDICT_OM } from "./Om";
 import { Scale } from "./Scale";
 import { Tape } from "./Tape";
 import { KIND_COLOR } from "@/lib/kinds";
@@ -20,7 +20,6 @@ const CHIPS: { k: K; label: string }[] = [
 export function CaseBoard({ file }: { file: CaseFile }) {
   const [hidden, setHidden] = useState<Set<K>>(new Set());
   const [open, setOpen] = useState<RecordItem | null>(null);
-  const [mood, setMood] = useState<Mood>(file.verdict.tone === "red" ? "squint" : "idle");
   const { counts, verdict } = file;
 
   const shown = useMemo(() => file.items.filter((i) => !hidden.has(i.kind)), [file.items, hidden]);
@@ -33,9 +32,9 @@ export function CaseBoard({ file }: { file: CaseFile }) {
   if (counts.total === 0) {
     return (
       <section className="empty">
-        <Eye size={200} mood={mood === "stare" ? "stare" : "idle"} />
+        <Om name="detective" size={190} className="mascot" />
         <p>Not on record. Yet.</p>
-        <Witness handle={file.channel} onMood={(m) => setMood(m)} />
+        <Witness handle={file.channel} />
       </section>
     );
   }
@@ -44,7 +43,7 @@ export function CaseBoard({ file }: { file: CaseFile }) {
     <>
       <section className="board">
         <div className="verdict-zone shake">
-          <Eye size={128} mood={mood} />
+          <Om name={VERDICT_OM[verdict.word]} size={124} className="verdict-om" />
           <div className={`stamp ${verdict.tone} big`}>{verdict.word}</div>
         </div>
         <Scale before={counts.call} after={counts.claim} pick={pick === "call" || pick === "claim" ? pick : null} onPick={solo} />
@@ -75,7 +74,7 @@ export function CaseBoard({ file }: { file: CaseFile }) {
       <Tape items={shown} onOpen={setOpen} />
 
       <div className="seal-row">
-        <Witness handle={file.channel} onMood={(m) => setMood(m === "stare" ? "stare" : verdict.tone === "red" ? "squint" : "idle")} />
+        <Witness handle={file.channel} />
       </div>
 
       {open && <PrintedReceipt it={open} onClose={() => setOpen(null)} />}

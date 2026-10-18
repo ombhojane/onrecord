@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Defs />
         <header className="topbar">
           <a href="/" className="wordmark">
-            <span className="dot" />
+            <img src="/om/receipt.svg" width={30} height={30} alt="" className="logo-om" />
             <b>On</b>
             <i>Record</i>
           </a>
@@ -50,6 +50,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </a>
             </>
           )}
+          {" · "}
+          emoji by{" "}
+          <a href="https://openmoji.org" target="_blank" rel="noreferrer">
+            OpenMoji
+          </a>{" "}
+          (CC BY-SA 4.0)
         </footer>
       </body>
     </html>
