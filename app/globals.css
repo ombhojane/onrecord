@@ -97,7 +97,7 @@ button { font: inherit; color: inherit; }
 }
 .stage-title {
   margin: 0; font-family: var(--font-serif), Georgia, serif; font-weight: 400;
-  font-size: clamp(52px, 8.6vw, 112px); line-height: .95; letter-spacing: -0.015em;
+  font-size: clamp(31px, 6vw, 80px); line-height: 1.06; letter-spacing: -0.015em;
 }
 .stage-title em { font-style: italic; position: relative; white-space: nowrap; }
 .stage-title em::after {
@@ -113,17 +113,18 @@ button { font: inherit; color: inherit; }
 .stage-search { margin-top: 36px; display: flex; justify-content: center; }
 .bazaar {
   margin: auto 0 0; pointer-events: none; position: relative;
-  height: clamp(200px, 30vh, 300px); overflow: hidden;
+  height: clamp(190px, 29vh, 330px); overflow: hidden;
 }
-.bazaar img {
-  position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-  height: 205%; width: auto; mix-blend-mode: multiply;
-  -webkit-mask: linear-gradient(90deg, transparent, #000 8% 92%, transparent);
-          mask: linear-gradient(90deg, transparent, #000 8% 92%, transparent);
+.bazaar-row {
+  position: absolute; bottom: -6px; left: -9999px; right: -9999px; margin: 0 auto;
+  width: max(100%, 1200px); display: flex; align-items: flex-end;
   animation: bazaarIn 1.1s .15s var(--ease) both, bazaarFloat 7s 1.4s ease-in-out infinite alternate;
 }
-@keyframes bazaarIn { from { transform: translateX(-50%) translateY(9%) } }
-@keyframes bazaarFloat { to { transform: translateX(-50%) translateY(-7px) } }
+.bazaar-row img {
+  width: 50%; height: auto; flex: none; mix-blend-mode: multiply;
+}
+@keyframes bazaarIn { from { bottom: -70px } }
+@keyframes bazaarFloat { to { bottom: 0px } }
 .dice {
   width: 46px; height: 46px; flex: none; border-radius: 12px; border: 0; cursor: pointer;
   background: transparent; color: var(--ink); display: grid; place-items: center; padding: 0;
@@ -135,8 +136,9 @@ button { font: inherit; color: inherit; }
 @media (max-width: 880px) {
   .stage-meta { position: static; margin: 16px auto 0; text-align: center; }
   .stage-meta.r { display: none; }
-  .stage-inner { padding-top: 12vh; }
-  .bazaar { height: clamp(170px, 24vh, 240px); }
+  .stage-inner { padding-top: 11vh; }
+  .bazaar { height: clamp(200px, 27vh, 270px); }
+  .bazaar-row { width: 330%; }
 }
 
 .cases-wrap { width: min(1120px, 100% - 32px); margin: 0 auto; padding: 78px 0 40px; }

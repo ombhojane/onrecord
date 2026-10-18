@@ -15,9 +15,9 @@ export default async function Home() {
         <div className="stage-inner">
           <p className="kicker">Telegram tip channels, held to their word</p>
           <h1 className="stage-title">
-            Show me the
+            Tipsters delete their losses.
             <br />
-            <em>receipts.</em>
+            <em>We keep the receipts.</em>
           </h1>
           <aside className="stage-meta l">
             <b>Witnessed on Arkiv</b>
@@ -32,7 +32,10 @@ export default async function Home() {
           </div>
         </div>
         <figure className="bazaar" aria-hidden>
-          <img src="/art/crowd.png" alt="" draggable={false} />
+          <div className="bazaar-row">
+            <img src="/art/crowd_a.png" alt="" draggable={false} />
+            <img src="/art/crowd_b.png" alt="" draggable={false} className="b" />
+          </div>
         </figure>
       </section>
     </main>
