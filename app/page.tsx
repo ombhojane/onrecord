@@ -32,7 +32,7 @@ export default async function Home() {
           </div>
         </div>
         <figure className="bazaar" aria-hidden>
-          <img src="/art/frieze.png" alt="" draggable={false} />
+          <img src="/art/crowd.png" alt="" draggable={false} />
         </figure>
       </section>
     </main>

@@ -1,5 +1,5 @@
 import sharp from "sharp";
-const src = "public/art/frieze_white.png";
+const src = process.argv[2] ?? "public/art/frieze_white.png";
 const img = sharp(src);
 const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
 // sample background from the top-left corner region
@@ -14,5 +14,5 @@ console.log("bg", r.toFixed(1), g.toFixed(1), b.toFixed(1));
 await sharp(src)
   .linear([255 / r, 255 / g, 255 / b], [0, 0, 0])
   .png()
-  .toFile("public/art/frieze.png");
-console.log("wrote public/art/frieze.png");
+  .toFile(process.argv[3] ?? "public/art/frieze.png");
+console.log("wrote", process.argv[3]);

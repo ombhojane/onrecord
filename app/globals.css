@@ -117,12 +117,13 @@ button { font: inherit; color: inherit; }
 }
 .bazaar img {
   position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-  height: 160%; width: auto; mix-blend-mode: multiply;
+  height: 205%; width: auto; mix-blend-mode: multiply;
   -webkit-mask: linear-gradient(90deg, transparent, #000 8% 92%, transparent);
           mask: linear-gradient(90deg, transparent, #000 8% 92%, transparent);
-  animation: bazaarIn 1.2s .2s var(--ease) both;
+  animation: bazaarIn 1.1s .15s var(--ease) both, bazaarFloat 7s 1.4s ease-in-out infinite alternate;
 }
-@keyframes bazaarIn { from { transform: translateX(-50%) translateY(7%) } }
+@keyframes bazaarIn { from { transform: translateX(-50%) translateY(9%) } }
+@keyframes bazaarFloat { to { transform: translateX(-50%) translateY(-7px) } }
 .dice {
   width: 46px; height: 46px; flex: none; border-radius: 12px; border: 0; cursor: pointer;
   background: transparent; color: var(--ink); display: grid; place-items: center; padding: 0;
