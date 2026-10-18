@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Bricolage_Grotesque, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Archivo, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { privateKeyToAccount } from "viem/accounts";
 import { Defs } from "@/components/Stamp";
 import { Heartbeat } from "@/components/Heartbeat";
-import { ownerUrl } from "@/lib/config";
+import { DATA_EXPLORER, ownerUrl } from "@/lib/config";
 import "./globals.css";
 
-const sans = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const sans = Archivo({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
 const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-serif", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   description: "Real track records for trading-tip channels, witnessed on Arkiv. Deleted calls become tombstones.",
 };
 
+/** Public address of the witness wallet; the key itself never leaves the server. */
 function witnessAddress() {
   const pk = process.env.ONRECORD_PRIVATE_KEY;
   try {
@@ -32,25 +33,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <Defs />
         <header className="topbar">
-          <a href="/" className="wordmark">
-            <span className="dot" />
-            <b>On</b>
-            <i>Record</i>
+          <a href="/" className="logo" aria-label="OnRecord home">
+            <span className="lamp">ON</span>
+            <span className="rec">RECORD</span>
           </a>
-          <Heartbeat witness={witness} />
+          <Heartbeat witness={witness} href={witness ? ownerUrl(witness) : `${DATA_EXPLORER}/?chain=tiramisu`} />
         </header>
         {children}
-        <footer className="foot">
-          not investment advice · witnessed on Arkiv Tiramisu
-          {witness && (
-            <>
-              {" · "}
-              <a href={ownerUrl(witness)} target="_blank" rel="noreferrer" className="mono">
-                {witness.slice(0, 6)}…{witness.slice(-4)}
-              </a>
-            </>
-          )}
-        </footer>
       </body>
     </html>
   );

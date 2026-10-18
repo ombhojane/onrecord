@@ -2,7 +2,7 @@ import { and, eq } from "@arkiv-network/sdk/query";
 import { u64 } from "@arkiv-network/sdk/attr";
 import { ExpirationTime, jsonToPayload } from "@arkiv-network/sdk/utils";
 import { avNum, publicClient, walletClient } from "./arkiv";
-import { APP_TAG, LIFETIME_DAYS } from "./config";
+import { APP_TAG, BURN, LIFETIME_DAYS, WITNESS } from "./config";
 import { classify } from "./classify";
 import { sha256Hex } from "./normalize";
 import { fetchChannel } from "./ingest";
@@ -16,7 +16,7 @@ async function existingIds(channel: string, type: "msg" | "tomb") {
   const ids = new Set<number>();
   for await (const e of publicClient()
     .select({ attributes: true })
-    .where(and(eq("app", APP_TAG), eq("type", type), eq("channel", channel)))) {
+    .where(and(eq("app", APP_TAG), eq("type", type), eq("channel", channel))).createdBy(WITNESS)) {
     const id = avNum(e.attributes?.msg_id);
     if (Number.isFinite(id)) ids.add(id);
   }
@@ -149,7 +149,14 @@ export async function syncChannel(handle: string): Promise<SyncResult> {
   const balance = await publicClient().getBalance({ address: wallet.account.address });
   if (balance === 0n) throw new Error("witness wallet needs test GLM");
   for (let i = 0; i < creates.length; i += BATCH) {
-    const { txHash } = await wallet.executeBatch({ creates: creates.slice(i, i + BATCH) });
+    // Predict each create's key so the SAME transaction can hand it to BURN:
+    // there is never a block in which the witness could delete what it wrote.
+    const chunk = creates.slice(i, i + BATCH);
+    const keys = await publicClient().predictEntityKeys({ owner: wallet.account.address, count: chunk.length });
+    const { txHash } = await wallet.executeBatch({
+      creates: chunk.map((c, j) => ({ ...c, salt: keys[j].salt })),
+      ownershipChanges: keys.map((k) => ({ entityKey: k.key, newOwner: BURN })),
+    });
     result.txHashes.push(txHash);
   }
   return result;

@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "OnRecord — the witness that can't be bought. Real track records for India's trading-tip channels, notarized on Arkiv.",
+  "description": "OnRecord \u2014 the witness that can't be bought. Real track records for India's trading-tip channels, notarized on Arkiv.",
   "license": "MIT",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
     "sync": "tsx scripts/sync.ts",
-    "wallet": "tsx scripts/wallet.ts"
+    "wallet": "tsx scripts/wallet.ts",
+    "verify": "tsx scripts/verify.ts"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",

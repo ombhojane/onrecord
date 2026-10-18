@@ -12,7 +12,7 @@ for (let y = 10; y < 60; y++)
 r /= n; g /= n; b /= n;
 console.log("bg", r.toFixed(1), g.toFixed(1), b.toFixed(1));
 await sharp(src)
-  .linear([255 / r, 255 / g, 255 / b], [0, 0, 0])
+  .linear([255 / (r * 0.985), 255 / (g * 0.985), 255 / (b * 0.985)], [0, 0, 0])
   .png()
   .toFile(process.argv[3] ?? "public/art/frieze.png");
 console.log("wrote", process.argv[3]);

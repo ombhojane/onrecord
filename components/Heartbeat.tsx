@@ -11,7 +11,7 @@ type Blip = { id: string; kind: "created" | "extended" | "deleted" | "other"; ou
  * The chain's pulse, live over a WebSocket subscription (watchEntityEvents with
  * no fromBlock, so it is a real socket, not polling). Red bars are our witness.
  */
-export function Heartbeat({ witness }: { witness?: string }) {
+export function Heartbeat({ witness, href }: { witness?: string; href: string }) {
   const [live, setLive] = useState(false);
   const [blips, setBlips] = useState<Blip[]>([]);
   const [n, setN] = useState(0);
@@ -41,7 +41,14 @@ export function Heartbeat({ witness }: { witness?: string }) {
   }, [witness]);
 
   return (
-    <div className={`beat${live ? " live" : ""}`} title="Arkiv Tiramisu · live entity events">
+    <a
+      className={`beat${live ? " live" : ""}`}
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      title="Open our entities on Arkiv Tiramisu"
+      aria-label="Open our entities on the Arkiv Tiramisu explorer"
+    >
       <span className="pulse" />
       <span className="blips">
         {blips.map((b) => (
@@ -49,6 +56,9 @@ export function Heartbeat({ witness }: { witness?: string }) {
         ))}
       </span>
       <span className="n mono">{n}</span>
-    </div>
+      <span className="go-arrow" aria-hidden>
+        ↗
+      </span>
+    </a>
   );
 }

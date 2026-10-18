@@ -40,13 +40,14 @@ export function Scale({
       tabIndex={0}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onPick(kind)}
     >
-      <line x1="0" y1="0" x2="-40" y2="74" stroke="var(--ink)" strokeWidth="2" />
-      <line x1="0" y1="0" x2="40" y2="74" stroke="var(--ink)" strokeWidth="2" />
-      <path className="dish" d="M-52 74 Q0 120 52 74 Z" fill="var(--card)" stroke="var(--ink)" strokeWidth="3" strokeLinejoin="round" />
-      <text className="num" x="0" y="99" textAnchor="middle" fill={kind === "claim" && n > 0 ? "var(--red)" : "var(--ink)"}>
+      <line x1="0" y1="0" x2="-48" y2="80" stroke="var(--ink)" strokeWidth="2" />
+      <line x1="0" y1="0" x2="48" y2="80" stroke="var(--ink)" strokeWidth="2" />
+      {/* the count sits on the pan like a weight, clear of the bowl */}
+      <text className="num" x="0" y="76" textAnchor="middle" fill={n === 0 ? "var(--mute)" : kind === "claim" ? "var(--red)" : "var(--green)"}>
         {n}
       </text>
-      <text className="lbl" x="0" y="144" textAnchor="middle">
+      <path className="dish" d="M-60 80 Q0 118 60 80 Z" fill="var(--card)" stroke="var(--ink)" strokeWidth="3" strokeLinejoin="round" />
+      <text className="lbl" x="0" y="126" textAnchor="middle">
         {label}
       </text>
     </g>
@@ -61,8 +62,8 @@ export function Scale({
           <line x1={PIVOT.x - ARM} y1={PIVOT.y} x2={PIVOT.x + ARM} y2={PIVOT.y} stroke="var(--ink)" strokeWidth="6" strokeLinecap="round" />
         </g>
         <circle cx={PIVOT.x} cy={PIVOT.y} r="10" fill="var(--red)" stroke="var(--ink)" strokeWidth="3" />
-        <Pan at={L} n={before} label="said before" kind="call" />
-        <Pan at={R} n={after} label="said after" kind="claim" />
+        <Pan at={L} n={before} label="POSTED FIRST" kind="call" />
+        <Pan at={R} n={after} label="CLAIMED AFTER" kind="claim" />
       </svg>
     </div>
   );

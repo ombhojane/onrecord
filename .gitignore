@@ -7,3 +7,6 @@ node_modules/
 test-root
 .vercel
 .env*
+public/cast/raw/
+public/brand/logo-[bcd].png
+public/brand/options.jpg

@@ -26,7 +26,31 @@ export default async function CasePage({ params }: { params: Promise<{ handle: s
             <path d="M19 12H5M11 18l-6-6 6-6" />
           </svg>
         </a>
-        <h1>@{channel}</h1>
+        <div className="case-id">
+          <h1>
+            @
+            {channel.split("_").map((part, i, all) => (
+              <span key={i}>
+                {part}
+                {i < all.length - 1 && (
+                  <>
+                    _<wbr />
+                  </>
+                )}
+              </span>
+            ))}
+          </h1>
+          <p className="case-meta">
+            <a href={`https://t.me/s/${channel}`} target="_blank" rel="noreferrer">
+              t.me/{channel} ↗
+            </a>
+            {file.counts.total > 0 && (
+              <span>
+                {file.counts.total + file.counts.deleted} posts on record
+              </span>
+            )}
+          </p>
+        </div>
       </div>
       <CaseBoard file={file} />
     </main>

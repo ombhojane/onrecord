@@ -93,6 +93,24 @@ We only found the accepted form by calling the SDK's `render()` on our own predi
 **Fix:** say "string literals use single quotes" in the error, and show the
 `render()` output of a TypeScript query in the explorer's TypeScript panel.
 
+## 6f. `readonly` does not stop the owner deleting — we nearly shipped a false claim
+**Expected:** `readonly: true` means the evidence can't be removed, which is what our
+first README and submission draft said.
+**Actual:** the `CreationFlags` doc comment (SDK 0.8.1) says a readonly entity can still
+be "ownership transferred, and the entity deleted". So our "nobody can delete it, us
+included" was false until we burned ownership: `predictEntityKeys` → `executeBatch({
+creates, ownershipChanges: [{ entityKey, newOwner: 0x…dEaD }] })`. After that, a delete
+from our own key reverts with `entity … is owned by 0x…dEaD, not 0x3e4d…`.
+**Fix:** say it on the flags page, in the name if possible: "readonly (edit-proof, not
+delete-proof)". Most teams will read `readonly` the way we did.
+
+## 6g. `predictEntityKeys` isn't on the wallet client's type
+**Repro (SDK 0.8.1):** `walletClient().predictEntityKeys({ owner, count })` → TypeScript
+`TS2339: Property 'predictEntityKeys' does not exist`, although the wallet client's doc
+says it carries "the read actions a Public Client has". `publicClient().predictEntityKeys`
+works. Minor, but it sits on the one path (predict → batch → hand over ownership) that
+makes evidence undeletable, so it's worth getting right.
+
 ## 7. Things that were genuinely smooth
 - The SDK ships query-injection tests (`src/query/injection.test.ts`) and typed `attr`
   constructors; that is why we pass a user-supplied channel handle into `eq()` after

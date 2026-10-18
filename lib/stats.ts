@@ -1,6 +1,6 @@
 import { and, eq } from "@arkiv-network/sdk/query";
 import { avNum, avStr, publicClient } from "./arkiv";
-import { APP_TAG, LIFETIME_DAYS } from "./config";
+import { WITNESS, APP_TAG, LIFETIME_DAYS } from "./config";
 
 export type Kind = "call" | "claim" | "promo" | "other";
 
@@ -64,7 +64,7 @@ export async function caseFile(channel: string): Promise<CaseFile> {
 
   for await (const e of pub
     .select({ key: true, attributes: true, payload: true, expiresAt: true, creator: true })
-    .where(and(eq("app", APP_TAG), eq("type", "msg"), eq("channel", channel)))) {
+    .where(and(eq("app", APP_TAG), eq("type", "msg"), eq("channel", channel))).createdBy(WITNESS)) {
     const a = e.attributes ?? {};
     let p: Record<string, unknown> = {};
     try {
@@ -89,7 +89,7 @@ export async function caseFile(channel: string): Promise<CaseFile> {
 
   for await (const e of pub
     .select({ key: true, attributes: true, expiresAt: true, creator: true })
-    .where(and(eq("app", APP_TAG), eq("type", "tomb"), eq("channel", channel)))) {
+    .where(and(eq("app", APP_TAG), eq("type", "tomb"), eq("channel", channel))).createdBy(WITNESS)) {
     const a = e.attributes ?? {};
     items.push({
       type: "tomb",
@@ -131,7 +131,7 @@ export async function allCases(): Promise<CaseSummary[]> {
   };
   for await (const e of pub
     .select({ attributes: true })
-    .where(and(eq("app", APP_TAG), eq("type", "msg")))) {
+    .where(and(eq("app", APP_TAG), eq("type", "msg"))).createdBy(WITNESS)) {
     const a = e.attributes ?? {};
     const ch = avStr(a.channel);
     if (!ch) continue;
@@ -141,7 +141,7 @@ export async function allCases(): Promise<CaseSummary[]> {
   }
   for await (const e of pub
     .select({ attributes: true })
-    .where(and(eq("app", APP_TAG), eq("type", "tomb")))) {
+    .where(and(eq("app", APP_TAG), eq("type", "tomb"))).createdBy(WITNESS)) {
     const a = e.attributes ?? {};
     const ch = avStr(a.channel);
     if (ch) get(ch).deleted++;

@@ -24,3 +24,14 @@ export const LIFETIME_DAYS = {
 } as const;
 
 export const EXTEND_DAYS = 30;
+
+/**
+ * The witness wallet. Reads trust only entities this wallet CREATED ($creator is
+ * set by the chain): anyone can write app=onrecord attributes, nobody can forge
+ * the creator.
+ */
+export const WITNESS = (process.env.NEXT_PUBLIC_ONRECORD_WITNESS ??
+  "0x3e4d746d07568B5d0BE5b6C83937c6FCd741e7fc") as `0x${string}`;
+
+/** Evidence is handed to this address in the creating transaction: no key, so no one (us included) can delete it. */
+export const BURN = "0x000000000000000000000000000000000000dEaD" as const;

@@ -1,6 +1,29 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+
+/** Pip positions on a 3×3 grid (1 = top-left … 9 = bottom-right). */
+const PIP_LAYOUT: Record<number, number[]> = {
+  1: [5], 2: [1, 9], 3: [1, 5, 9], 4: [1, 3, 7, 9], 5: [1, 3, 5, 7, 9], 6: [1, 3, 4, 6, 7, 9],
+};
+/** Like a real die, opposite faces sum to 7: front/back 1·6, top/bottom 2·5, right/left 3·4. */
+const FACES = [
+  ["front", 1], ["back", 6], ["top", 2], ["bottom", 5], ["right", 3], ["left", 4],
+] as const;
+
+function Cube() {
+  return (
+    <span className="cube" aria-hidden>
+      {FACES.map(([f, n]) => (
+        <span key={f} className={`face ${f}`}>
+          {PIP_LAYOUT[n].map((p) => (
+            <i key={p} style={{ gridArea: `${Math.ceil(p / 3)} / ${((p - 1) % 3) + 1}` }} />
+          ))}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function cleanHandle(raw: string) {
   return raw
@@ -15,32 +38,26 @@ export function SearchSlip({ pool = [] }: { pool?: string[] }) {
   const [v, setV] = useState("");
   const [rolling, setRolling] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   const go = (e: React.FormEvent) => {
     e.preventDefault();
     const h = cleanHandle(v);
-    if (h.length >= 3) router.push(`/c/${h}`);
+    if (h.length >= 3) startTransition(() => router.push(`/c/${h}`));
   };
 
-  /** The dice: pulls a random channel already on record and types it in. */
+  /** The dice: drops a random channel already on record straight into the slip. */
   function roll() {
-    if (pool.length === 0 || rolling) return;
-    const pick = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length === 0) return;
+    const others = pool.filter((p) => p !== cleanHandle(v));
+    const pick = (others.length ? others : pool)[Math.floor(Math.random() * (others.length || pool.length))];
+    setV(pick);
     setRolling(true);
-    setV("");
-    if (timer.current) clearInterval(timer.current);
-    let i = 0;
-    timer.current = setInterval(() => {
-      i++;
-      setV(pick.slice(0, i));
-      if (i >= pick.length) {
-        if (timer.current) clearInterval(timer.current);
-        setRolling(false);
-        inputRef.current?.focus();
-      }
-    }, 26);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setRolling(false), 600);
+    inputRef.current?.focus();
   }
 
   return (
@@ -48,6 +65,7 @@ export function SearchSlip({ pool = [] }: { pool?: string[] }) {
       <span className="at">@</span>
       <input
         ref={inputRef}
+        className={rolling ? "rolled" : undefined}
         value={v}
         onChange={(e) => setV(e.target.value)}
         placeholder="channel"
@@ -63,20 +81,17 @@ export function SearchSlip({ pool = [] }: { pool?: string[] }) {
           aria-label="pick a channel already on record"
           title="try one on record"
         >
-          <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden>
-            <rect x="2" y="2" width="22" height="22" rx="6" fill="var(--card)" stroke="currentColor" strokeWidth="2.4" />
-            <circle cx="8.5" cy="8.5" r="2" fill="currentColor" />
-            <circle cx="17.5" cy="8.5" r="2" fill="currentColor" />
-            <circle cx="13" cy="13" r="2" fill="currentColor" />
-            <circle cx="8.5" cy="17.5" r="2" fill="currentColor" />
-            <circle cx="17.5" cy="17.5" r="2" fill="currentColor" />
-          </svg>
+          <Cube />
         </button>
       )}
-      <button className="go" type="submit" aria-label="check the record">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
+      <button className={`go${pending ? " busy" : ""}`} type="submit" aria-label="check the record" disabled={pending}>
+        {pending ? (
+          <span className="go-spin" aria-hidden />
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        )}
       </button>
     </form>
   );

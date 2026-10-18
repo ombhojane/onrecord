@@ -4,7 +4,22 @@ All entities are written to **Tiramisu** (chain id `7738577`) by the witness wal
 namespaced with `app = "onrecord"`. Attributes are the queryable surface; payloads hold
 the full JSON record. Times are unix seconds stored as `u64` so they range-query.
 
-Witness wallet (creates all entities below): see `WALLETS.md` / Devfolio submission.
+Witness wallet (creates all entities below): `0x3e4d746d07568B5d0BE5b6C83937c6FCd741e7fc`.
+
+## Trust: `$creator` and ownership
+
+- **Reads trust only `$creator`.** Every query adds `.createdBy(WITNESS)`. Anyone can
+  write an entity with `app = "onrecord"`; nobody can forge the creator, which the
+  chain sets. A forged post from another wallet never reaches a case file.
+- **Nobody owns the evidence.** Each create is handed to `0x…dEaD` *in the same
+  transaction* (`predictEntityKeys` → `executeBatch({ creates, ownershipChanges })`).
+  `readonly` stops edits but not the owner's delete, so ownership is burned too: no key,
+  including ours, can delete a record. A delete from the witness key reverts with
+  `entity … is owned by 0x…dEaD`.
+- **Anyone can still keep it alive.** `msg` and `tomb` keep `permissionlessExtension`,
+  so extension doesn't need an owner.
+- **Check it without us:** `npm run verify -- <channel>` re-reads the chain and checks
+  creator, owner, readonly flag and content hash for every entity.
 
 ## Creation flags (fixed at creation, cannot change)
 
@@ -16,8 +31,9 @@ Witness wallet (creates all entities below): see `WALLETS.md` / Devfolio submiss
 
 ## Writes
 
-A witness pass is written with `executeBatch({ creates })` in chunks of 20, so one page
-snapshot lands in one block under one timestamp. The UI's "keep alive +30d" calls
+A witness pass is written with `executeBatch({ creates, ownershipChanges })` in chunks
+of 20, so one page snapshot lands in one block under one timestamp, already owned by
+`0x…dEaD`. The UI's "keep alive +30d" calls
 `extendEntity` with `ExpirationTime.atBlock(currentExpiry + 30 days of blocks)` —
 Lifetime Extension that always moves the deadline later, never resets it.
 

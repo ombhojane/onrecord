@@ -1,0 +1,14 @@
+node_modules
+.next
+.env*
+.vercel
+public/cast/raw
+public/art/raw
+apps
+packages
+*.log
+.DS_Store
+public/brand/logo-*.png
+public/brand/options.jpg
+video
+video/

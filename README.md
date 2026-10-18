@@ -53,6 +53,16 @@ npm run dev               # open http://localhost:3000
 Network: Arkiv **Tiramisu** testnet, chain id `7738577`
 (`https://rpc.tiramisu.db-chain.testnet.arkiv.network`).
 
+Check any channel's record yourself, with no key and no OnRecord server:
+
+```bash
+npm run verify -- bulltrade_observation
+```
+
+It reads Tiramisu directly and checks every entity: created by the witness wallet,
+owned by `0x…dEaD` (nobody can delete it, us included), `readonly` (nobody can edit
+it), and the content hash matches.
+
 - [`arkiv/schema.md`](arkiv/schema.md) — entity types, attributes, lifetimes, queries
 - [`arkiv/friction.md`](arkiv/friction.md) — expected-vs-actual build log on SDK 0.8.1
 
@@ -63,6 +73,13 @@ Network: Arkiv **Tiramisu** testnet, chain id `7738577`
 - Query to reproduce the scoreboard ([open it in the Data Explorer](https://data.arkiv.network/?chain=tiramisu&q=app%20%3D%20str('onrecord')%20AND%20type%20%3D%20str('msg')%20AND%20channel%20%3D%20str('bulltrade_observation'))):
   `app = str('onrecord') AND type = str('msg') AND channel = str('bulltrade_observation')`
   — all 20 entities of the first pass share one transaction hash: one atomic `executeBatch`.
+- Every entity is owned by `0x000000000000000000000000000000000000dEaD`. New writes are
+  handed over in the creating transaction; the first 28 were handed over in
+  [`0x26a9de6d…`](https://tiramisu.explorer.arkiv.network/tx/0x26a9de6d9242dcb202de03d66b54c8f143a1d9e2083bc84dcca8da2ba8d50976)
+  and [`0xce0cff1e…`](https://tiramisu.explorer.arkiv.network/tx/0xce0cff1e2284f98060db16d1ba86ca8140c2fbe6825aee35cfb2887203d83cfa).
+  A delete from the witness key now reverts: `entity … is owned by 0x…dEaD, not 0x3e4d…`.
+- Reads filter by `$creator` (`.createdBy(witness)`), so an entity another wallet
+  writes with `app = "onrecord"` never shows up.
 - Example witnessed claim (readonly + permissionlessExtension):
   [`0xb2a791f7…0c548c`](https://data.arkiv.network/entity/0xb2a791f7cf143506d218921568e9425f082479ce215453a6c4baaaf1700c548c?chain=tiramisu)
 
