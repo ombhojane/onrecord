@@ -83,6 +83,16 @@ funded write (the SDK did not validate client-side), costing a round trip at the
 moment. We renamed to `content_hash` / `msg_id` / `seen_at`. **Fix:** validate names in
 the SDK before signing, and correct the charset in the error.
 
+## 6e. Data Explorer query errors don't point at the actual mistake
+**Repro (Tiramisu, data.arkiv.network):**
+- `app = str("onrecord") AND …` (double quotes) → `Query rejected (literal, -32003):
+  Transaction creation failed.` — a query is not a transaction.
+- `app = "onrecord" && …` → `Query rejected (parse, -32001): Requested resource not found.`
+- `app = str('onrecord') AND …` (single quotes) → works, 20 of 20 entities.
+We only found the accepted form by calling the SDK's `render()` on our own predicate.
+**Fix:** say "string literals use single quotes" in the error, and show the
+`render()` output of a TypeScript query in the explorer's TypeScript panel.
+
 ## 7. Things that were genuinely smooth
 - The SDK ships query-injection tests (`src/query/injection.test.ts`) and typed `attr`
   constructors; that is why we pass a user-supplied channel handle into `eq()` after

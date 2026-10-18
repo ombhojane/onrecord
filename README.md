@@ -60,8 +60,9 @@ Network: Arkiv **Tiramisu** testnet, chain id `7738577`
 
 - Witness wallet (creates every OnRecord entity):
   [`0x3e4d746d07568B5d0BE5b6C83937c6FCd741e7fc`](https://data.arkiv.network/owner/0x3e4d746d07568B5d0BE5b6C83937c6FCd741e7fc?chain=tiramisu)
-- Query to reproduce the scoreboard, in the [Data Explorer](https://data.arkiv.network/?chain=tiramisu):
-  `app = "onrecord" && type = "msg" && channel = "bulltrade_observation"`
+- Query to reproduce the scoreboard ([open it in the Data Explorer](https://data.arkiv.network/?chain=tiramisu&q=app%20%3D%20str('onrecord')%20AND%20type%20%3D%20str('msg')%20AND%20channel%20%3D%20str('bulltrade_observation'))):
+  `app = str('onrecord') AND type = str('msg') AND channel = str('bulltrade_observation')`
+  — all 20 entities of the first pass share one transaction hash: one atomic `executeBatch`.
 - Example witnessed claim (readonly + permissionlessExtension):
   [`0xb2a791f7…0c548c`](https://data.arkiv.network/entity/0xb2a791f7cf143506d218921568e9425f082479ce215453a6c4baaaf1700c548c?chain=tiramisu)
 
